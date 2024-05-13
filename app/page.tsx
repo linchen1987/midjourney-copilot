@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
-import data1 from "../.local/data/1";
 import PromptWithTags from "@/components/prompt-with-tags";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/spinner";
