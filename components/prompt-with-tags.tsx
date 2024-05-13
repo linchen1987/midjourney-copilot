@@ -86,13 +86,13 @@ export default function PromptWithTags({
   text,
   segments,
 }: {
-  text: string;
+  text?: string;
   segments: Segment[];
 }) {
-  const [texts, setTexts] = useState<Segment[]>(segmentText(text, segments));
+  const [texts, setTexts] = useState<Segment[]>(segmentText(text || '', segments));
 
   useEffect(() => {
-    const res = segmentText(text, segments);
+    const res = segmentText(text || '', segments);
     setTexts(res);
   }, [text, segments]);
 
@@ -103,15 +103,7 @@ export default function PromptWithTags({
           <TooltipProvider key={index}>
             <Tooltip>
               <TooltipTrigger>
-                <span
-                  className={clsx(
-                    // 'me-2',
-                    // "px-2",
-                    // 'py-0.5',
-                    // "rounded",
-                    'mx-0.5',
-                    categories[segment.tag]?.color
-                  )}>
+                <span className={clsx('mx-0.5', categories[segment.tag]?.color)}>
                   {segment.text}
                 </span>
               </TooltipTrigger>

@@ -24,11 +24,37 @@ const exampleMjPrompt =
 
 export default function Home() {
   const { toast } = useToast();
-  const [input, setInput] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const [input, setInput] = useState<string>('');
   const [outputPrompt, setOutputPrompt] = useState<string>('');
+  const [outputPromptLocalized, setOutputPromptLocalized] = useState<string>('');
   const [outputSegments, setOutputSegments] = useState<Segment[]>([]);
+
+  const fetchTranslate = async (text: string) => {
+    const sourceList = [
+      {
+        id: 'mjPrompt',
+        text,
+      },
+    ];
+    try {
+      const res = await fetch('/api/translate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sourceList,
+        }),
+      });
+      const data = await res.json();
+      data[0].TargetText && setOutputPromptLocalized(data[0].TargetText);
+    } catch (error: Error | any) {
+      toast({
+        title: error?.message,
+      });
+    }
+  };
 
   const onSubmit = async () => {
     setLoading(true);
@@ -39,25 +65,14 @@ export default function Home() {
     }
     const mjPrompt = (input || exampleMjPrompt).trim();
     try {
-      const res = await getPromptSegments(mjPrompt);
-      const _segments: Segment[] = [];
-      for (const [category, texts] of Object.entries(res)) {
-        if (typeof texts === 'string') {
-          _segments.push({ text: texts, tag: category });
-        } else {
-          for (const text of texts as Array<string>) {
-            _segments.push({ text, tag: category });
-          }
-        }
-      }
+      fetchTranslate(mjPrompt);
+      const _segments = await getPromptSegments(mjPrompt);
       setOutputSegments(_segments);
-      console.log(_segments);
       setOutputPrompt(mjPrompt);
       setLoading(false);
     } catch (error: Error | any) {
       toast({
         title: error?.message,
-        // description: "Friday, February 10, 2023 at 5:57 PM",
       });
       setLoading(false);
     }
@@ -91,36 +106,42 @@ export default function Home() {
           <h2 className="text-3xl mb-4 font-bold text-gray-800">结果</h2>
           <div className="mt-8 space-y-2 px-0">
             {CATEGORIES.map((category) => (
-              <p key={category.id} className="flex text-lg mr-2">
+              <div key={category.id} className="flex text-lg mr-2">
                 <div className={clsx('font-bold shrink-0', category.textColor)}>
                   {category.name}：
                 </div>
-                {/* <span className={clsx('font-bold grow-0', category.textColor)}>
-                {outputSegments
-                  .filter((x) => x.tag === category.id)
-                  .map((x) => x.text)
-                  .join(', ') || '无'}
-              </span> */}
                 <div className="flex flex-wrap shrink-1">
                   {filterSegments(outputSegments, category.id).map((x, index) => (
                     <div
                       className={clsx(
-                        'shrink-0 text-white px-2 mx-2 mb-2 rounded-full text-[1rem]',
-                        category.bgColor
+                        'flex items-center shrink-0 text-white mx-2 mb-2 text-[1rem] rounded-lg overflow-hidden'
                       )}
                       key={x.text}>
-                      {x.text}
+                      <div
+                        className={clsx(
+                          'pl-2.5',
+                          x.textLocalized ? 'pr-2' : 'pr-2.5',
+                          category.bgColor
+                        )}>
+                        {x.text}
+                      </div>
+                      {!!x.textLocalized && (
+                        <div className={clsx('pl-2 pr-2.5', 'bg-gray-500')}>
+                          {x.textLocalized}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
-              </p>
+              </div>
             ))}
           </div>
-          {!!outputSegments?.length && (
-            <div className="border p-4 mt-6">
-              <PromptWithTags text={outputPrompt} segments={outputSegments} />
-            </div>
-          )}
+          <div className="border p-4 mt-6">
+            <PromptWithTags text={outputPrompt} segments={outputSegments} />
+            {!!outputPromptLocalized && (
+              <div className="mt-4 pt-4 border-t">{outputPromptLocalized}</div>
+            )}
+          </div>
         </div>
       )}
     </main>

@@ -1,6 +1,7 @@
 export type Segment = {
   id?: string;
   text: string;
+  textLocalized?: string;
   tag?: string;
   textColor?: string;
 };
