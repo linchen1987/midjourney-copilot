@@ -1,4 +1,5 @@
 import { Categories } from "../types";
+
 export const CATEGORY_MAP: Categories = {
   subject: {
     name: "主体",
@@ -8,15 +9,15 @@ export const CATEGORY_MAP: Categories = {
     name: "环境",
     color: "bg-green-200",
   },
-  composition: {
+  pointOfViewAndComposition: {
     name: "构图",
     color: "bg-yellow-200",
   },
-  light: {
+  lightingAndColor: {
     name: "光线",
     color: "bg-red-200",
   },
-  style: {
+  mediumAndStyles: {
     name: "风格",
     color: "bg-purple-200",
   },

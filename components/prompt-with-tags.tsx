@@ -20,15 +20,15 @@ const categories: Record<string, { name: string; color: string }> = {
     name: "环境",
     color: "bg-green-200",
   },
-  composition: {
+  pointOfViewAndComposition: {
     name: "构图",
     color: "bg-yellow-200",
   },
-  light: {
+  lightingAndColor: {
     name: "光线",
     color: "bg-red-200",
   },
-  style: {
+  mediumAndStyles: {
     name: "风格",
     color: "bg-purple-200",
   },
@@ -54,14 +54,17 @@ function segmentText(text: string, segments: Segment[]): Segment[] {
     }
   }
 
+  const lowerCasedText = text.toLowerCase();
   // 首先，按照 segments 中的顺序对 text 进行分割
   const filteredSegments = parsedSegments.filter(
-    (segment) => segment.text && text.includes(segment.text)
+    (segment) => segment.text && lowerCasedText.includes(segment.text)
   );
-  filteredSegments.sort((a, b) => text.indexOf(a.text) - text.indexOf(b.text));
+  filteredSegments.sort(
+    (a, b) => lowerCasedText.indexOf(a.text) - lowerCasedText.indexOf(b.text)
+  );
 
   filteredSegments.forEach((segment) => {
-    const startIndex = text.indexOf(segment.text, currentIndex);
+    const startIndex = lowerCasedText.indexOf(segment.text, currentIndex);
     if (startIndex > currentIndex) {
       // 添加未标记的文本片段
       result.push({ text: text.substring(currentIndex, startIndex) });

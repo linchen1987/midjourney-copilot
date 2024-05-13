@@ -9,6 +9,7 @@ import { Spinner } from "@/components/spinner";
 import { getPromptSegments } from "@/lib/api";
 import { Segment } from "@/types";
 import { CATEGORY_MAP } from "@/lib/constants";
+import { useToast } from "@/components/ui/use-toast";
 
 const categories = [
   {
@@ -20,30 +21,28 @@ const categories = [
     name: "环境",
   },
   {
-    id: "composition",
+    id: "pointOfViewAndComposition",
     name: "构图",
   },
   {
-    id: "scenery",
-    name: "景别",
-  },
-  {
-    id: "light",
+    id: "lightingAndColor",
     name: "光线",
   },
   {
-    id: "style",
+    id: "mediumAndStyles",
     name: "风格",
   },
 ];
 export default function Home() {
+  const { toast } = useToast();
   // const [input, setInput] = useState<string>("");
   const [input, setInput] = useState<string>(
     "Create a dynamic and colorful urban street art-inspired composition that blends various elements of graffiti, such as expressive cartoon characters, dripping paint effects, and layered tagging. Incorporate a mixture of vibrant and contrasting colors like electric blue, vivid yellow, and hot pink, while embedding symbols like peace signs, hearts, and iconic pop culture references. Ensure the artwork conveys a sense of spontaneous creativity and the raw energy of the urban underground art scene"
   );
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [segments, setSegments] = useState<Segment[]>([]);
+  const [outputPrompt, setOutputPrompt] = useState<string>("");
+  const [outputSegments, setOutputSegments] = useState<Segment[]>([]);
 
   // const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
   //   if (e.key === "Enter") {
@@ -52,7 +51,8 @@ export default function Home() {
   // };
   const onSubmit = async () => {
     setLoading(true);
-    setSegments([]);
+    setOutputSegments([]);
+    setOutputPrompt("");
     try {
       const res = await getPromptSegments(input);
       const _segments: Segment[] = [];
@@ -65,10 +65,14 @@ export default function Home() {
           }
         }
       }
-      setSegments(_segments);
+      setOutputSegments(_segments);
+      setOutputPrompt(input);
       setLoading(false);
-    } catch (error) {
-      // TODO toast
+    } catch (error: Error | any) {
+      toast({
+        title: error?.message,
+        // description: "Friday, February 10, 2023 at 5:57 PM",
+      });
       setLoading(false);
     }
   };
@@ -97,14 +101,14 @@ export default function Home() {
         </Button>
       </div>
 
-      {!!segments.length && (
+      {!!outputSegments.length && (
         <div className="mt-10">
           <h2 className="text-2xl mb-4">结果</h2>
           {categories.map((category) => (
             <p key={category.id}>
               <span>{category.name}：</span>
               <span>
-                {segments
+                {outputSegments
                   .filter((x) => x.tag === category.id)
                   .map((x) => x.text)
                   .join(", ") || "无"}
@@ -114,9 +118,9 @@ export default function Home() {
         </div>
       )}
 
-      {!!input && !!segments?.length && (
+      {!!input && !!outputSegments?.length && (
         <div className="mt-10 border p-4">
-          <PromptWithTags text={input} segments={segments} />
+          <PromptWithTags text={outputPrompt} segments={outputSegments} />
         </div>
       )}
     </main>

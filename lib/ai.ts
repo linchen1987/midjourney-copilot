@@ -5,6 +5,7 @@ import { analysisPrompt } from "./prompt";
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
 const openai = new OpenAI({
+  // baseURL: "https://api.deepseek.com/v1",
   httpAgent: process.env.https_proxy
     ? new HttpsProxyAgent(process.env.https_proxy || "")
     : undefined,
