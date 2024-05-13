@@ -3,7 +3,7 @@ const _fetch = async (url: string, opts: RequestInit = {}) => {
   const res = await fetch(url, {
     headers: {
       ...headers,
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
     ...restOpts,
   });
@@ -14,7 +14,7 @@ const _fetch = async (url: string, opts: RequestInit = {}) => {
 
 export async function getPromptSegments(prompt: string) {
   return _fetch(`/api/get-prompt-segments`, {
-    method: "POST",
+    method: 'POST',
     body: JSON.stringify({ prompt }),
   });
 }

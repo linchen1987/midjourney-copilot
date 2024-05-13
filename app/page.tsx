@@ -29,110 +29,6 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [outputPrompt, setOutputPrompt] = useState<string>('');
   const [outputSegments, setOutputSegments] = useState<Segment[]>([]);
-  // const [outputSegments, setOutputSegments] = useState<Segment[]>([
-  //   {
-  //     text: 'composition',
-  //     tag: 'subject',
-  //   },
-  //   {
-  //     text: 'graffiti',
-  //     tag: 'subject',
-  //   },
-  //   {
-  //     text: 'expressive cartoon characters',
-  //     tag: 'subject',
-  //   },
-  //   {
-  //     text: 'dripping paint effects',
-  //     tag: 'subject',
-  //   },
-  //   {
-  //     text: 'layered tagging',
-  //     tag: 'subject',
-  //   },
-  //   {
-  //     text: 'symbols',
-  //     tag: 'subject',
-  //   },
-  //   {
-  //     text: 'pop culture references',
-  //     tag: 'subject',
-  //   },
-  //   {
-  //     text: 'urban street art scene',
-  //     tag: 'environment',
-  //   },
-  //   {
-  //     text: 'spontaneous creativity',
-  //     tag: 'environment',
-  //   },
-  //   {
-  //     text: 'raw energy',
-  //     tag: 'environment',
-  //   },
-  //   {
-  //     text: 'dynamic',
-  //     tag: 'mediumAndStyles',
-  //   },
-  //   {
-  //     text: 'colorful',
-  //     tag: 'mediumAndStyles',
-  //   },
-  //   {
-  //     text: 'urban street art-inspired',
-  //     tag: 'mediumAndStyles',
-  //   },
-  //   {
-  //     text: 'vibrant',
-  //     tag: 'mediumAndStyles',
-  //   },
-  //   {
-  //     text: 'contrasting',
-  //     tag: 'mediumAndStyles',
-  //   },
-  //   {
-  //     text: 'electric blue',
-  //     tag: 'mediumAndStyles',
-  //   },
-  //   {
-  //     text: 'vivid yellow',
-  //     tag: 'mediumAndStyles',
-  //   },
-  //   {
-  //     text: 'hot pink',
-  //     tag: 'mediumAndStyles',
-  //   },
-  //   {
-  //     text: 'peace signs',
-  //     tag: 'mediumAndStyles',
-  //   },
-  //   {
-  //     text: 'hearts',
-  //     tag: 'mediumAndStyles',
-  //   },
-  //   {
-  //     text: 'iconic pop culture references',
-  //     tag: 'mediumAndStyles',
-  //   },
-  //   {
-  //     text: 'blends various elements',
-  //     tag: 'pointOfViewAndComposition',
-  //   },
-  //   {
-  //     text: 'incorporate a mixture',
-  //     tag: 'pointOfViewAndComposition',
-  //   },
-  //   {
-  //     text: 'ensure the artwork conveys',
-  //     tag: 'pointOfViewAndComposition',
-  //   },
-  // ]);
-
-  // const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-  //   if (e.key === "Enter") {
-  //     // router.push(`/search?q=${encodeURIComponent(value)}`);
-  //   }
-  // };
 
   const onSubmit = async () => {
     setLoading(true);
@@ -191,39 +87,40 @@ export default function Home() {
       </div>
 
       {!!outputSegments.length && (
-        <div className="mt-10 space-y-2">
+        <div className="mt-10">
           <h2 className="text-3xl mb-4 font-bold text-gray-800">结果</h2>
-          {CATEGORIES.map((category) => (
-            <p key={category.id} className="flex text-lg mr-2">
-              <div className={clsx('font-bold shrink-0', category.textColor)}>
-                {category.name}：
-              </div>
-              {/* <span className={clsx('font-bold grow-0', category.textColor)}>
+          <div className="mt-8 space-y-2 px-0">
+            {CATEGORIES.map((category) => (
+              <p key={category.id} className="flex text-lg mr-2">
+                <div className={clsx('font-bold shrink-0', category.textColor)}>
+                  {category.name}：
+                </div>
+                {/* <span className={clsx('font-bold grow-0', category.textColor)}>
                 {outputSegments
                   .filter((x) => x.tag === category.id)
                   .map((x) => x.text)
                   .join(', ') || '无'}
               </span> */}
-              <div className="flex flex-wrap shrink-1">
-                {filterSegments(outputSegments, category.id).map((x, index) => (
-                  <div
-                    className={clsx(
-                      'shrink-0 text-white px-2 mx-2 mb-2 rounded-full text-[1rem]',
-                      category.bgColor
-                    )}
-                    key={x.text}>
-                    {x.text}
-                  </div>
-                ))}
-              </div>
-            </p>
-          ))}
-        </div>
-      )}
-
-      {!!outputSegments?.length && (
-        <div className="mt-10 border p-4">
-          <PromptWithTags text={outputPrompt} segments={outputSegments} />
+                <div className="flex flex-wrap shrink-1">
+                  {filterSegments(outputSegments, category.id).map((x, index) => (
+                    <div
+                      className={clsx(
+                        'shrink-0 text-white px-2 mx-2 mb-2 rounded-full text-[1rem]',
+                        category.bgColor
+                      )}
+                      key={x.text}>
+                      {x.text}
+                    </div>
+                  ))}
+                </div>
+              </p>
+            ))}
+          </div>
+          {!!outputSegments?.length && (
+            <div className="border p-4 mt-6">
+              <PromptWithTags text={outputPrompt} segments={outputSegments} />
+            </div>
+          )}
         </div>
       )}
     </main>
