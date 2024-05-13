@@ -19,12 +19,12 @@ const filterSegments = (segments: Segment[], categoryId: string): Segment[] => {
   return list;
 };
 
+const exampleMjPrompt =
+  'Create a dynamic and colorful urban street art-inspired composition that blends various elements of graffiti, such as expressive cartoon characters, dripping paint effects, and layered tagging. Incorporate a mixture of vibrant and contrasting colors like electric blue, vivid yellow, and hot pink, while embedding symbols like peace signs, hearts, and iconic pop culture references. Ensure the artwork conveys a sense of spontaneous creativity and the raw energy of the urban underground art scene';
+
 export default function Home() {
   const { toast } = useToast();
-  // const [input, setInput] = useState<string>("");
-  const [input, setInput] = useState<string>(
-    'Create a dynamic and colorful urban street art-inspired composition that blends various elements of graffiti, such as expressive cartoon characters, dripping paint effects, and layered tagging. Incorporate a mixture of vibrant and contrasting colors like electric blue, vivid yellow, and hot pink, while embedding symbols like peace signs, hearts, and iconic pop culture references. Ensure the artwork conveys a sense of spontaneous creativity and the raw energy of the urban underground art scene'
-  );
+  const [input, setInput] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [outputPrompt, setOutputPrompt] = useState<string>('');
@@ -138,8 +138,12 @@ export default function Home() {
     setLoading(true);
     setOutputSegments([]);
     setOutputPrompt('');
+    if (!input) {
+      setInput(exampleMjPrompt);
+    }
+    const mjPrompt = (input || exampleMjPrompt).trim();
     try {
-      const res = await getPromptSegments(input);
+      const res = await getPromptSegments(mjPrompt);
       const _segments: Segment[] = [];
       for (const [category, texts] of Object.entries(res)) {
         if (typeof texts === 'string') {
@@ -152,7 +156,7 @@ export default function Home() {
       }
       setOutputSegments(_segments);
       console.log(_segments);
-      setOutputPrompt(input);
+      setOutputPrompt(mjPrompt);
       setLoading(false);
     } catch (error: Error | any) {
       toast({
@@ -173,11 +177,14 @@ export default function Home() {
         <Textarea
           id="description"
           className="min-h-32 focus:ring-0 focus-visible:ring-0"
-          placeholder="输入提示词"
+          placeholder={exampleMjPrompt}
           value={input}
           onChange={(e) => setInput(e.target.value)}
         />
-        <Button className="mt-2 w-full" disabled={loading || !input} onClick={onSubmit}>
+        <Button
+          className="mt-2 w-full"
+          disabled={loading || !!(input && !input.trim())}
+          onClick={onSubmit}>
           {loading ? <Spinner className="text-inherit size-4 mr-1" /> : null}
           提交
         </Button>
@@ -214,7 +221,7 @@ export default function Home() {
         </div>
       )}
 
-      {!!input && !!outputSegments?.length && (
+      {!!outputSegments?.length && (
         <div className="mt-10 border p-4">
           <PromptWithTags text={outputPrompt} segments={outputSegments} />
         </div>
