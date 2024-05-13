@@ -1,36 +1,36 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import clsx from "clsx";
-import clone from "lodash/clone";
+import { useEffect, useState } from 'react';
+import clsx from 'clsx';
+import clone from 'lodash/clone';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Segment } from "@/types";
+} from '@/components/ui/tooltip';
+import { Segment } from '@/types';
 
 const categories: Record<string, { name: string; color: string }> = {
   subject: {
-    name: "主体",
-    color: "bg-blue-200",
+    name: '主体',
+    color: 'text-blue-600',
   },
   environment: {
-    name: "环境",
-    color: "bg-green-200",
+    name: '环境',
+    color: 'text-green-600',
   },
   pointOfViewAndComposition: {
-    name: "构图",
-    color: "bg-yellow-200",
+    name: '构图',
+    color: 'text-yellow-600',
   },
   lightingAndColor: {
-    name: "光线",
-    color: "bg-red-200",
+    name: '光线',
+    color: 'text-red-600',
   },
   mediumAndStyles: {
-    name: "风格",
-    color: "bg-purple-200",
+    name: '风格',
+    color: 'text-purple-600',
   },
 };
 
@@ -41,12 +41,12 @@ function segmentText(text: string, segments: Segment[]): Segment[] {
   const parsedSegments: Segment[] = [];
   for (const x of segments) {
     const segment = clone(x);
-    segment.text = (segment.text || "").toLowerCase();
+    segment.text = (segment.text || '').toLowerCase();
 
-    if (segment.text.includes(",")) {
+    if (segment.text.includes(',')) {
       parsedSegments.push(
         ...segment.text
-          .split(",")
+          .split(',')
           .map((text) => ({ text: text.trim(), tag: segment.tag }))
       );
     } else {
@@ -105,14 +105,13 @@ export default function PromptWithTags({
               <TooltipTrigger>
                 <span
                   className={clsx(
-                    "me-2",
-                    "px-2",
-                    "py-0.5",
-                    "rounded",
-                    categories[segment.tag]?.color,
-                    "mx-0.5"
-                  )}
-                >
+                    // 'me-2',
+                    // "px-2",
+                    // 'py-0.5',
+                    // "rounded",
+                    'mx-0.5',
+                    categories[segment.tag]?.color
+                  )}>
                   {segment.text}
                 </span>
               </TooltipTrigger>
