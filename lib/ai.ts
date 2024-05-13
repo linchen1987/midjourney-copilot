@@ -21,7 +21,15 @@ class AI {
     console.log('AI is ready!');
   }
 
-  async getPromptSegments(mjPrompt: string, model?: string) {
+  async getPromptSegments({
+    mjPrompt,
+    model,
+    analysisPrompt,
+  }: {
+    mjPrompt: string;
+    model?: string;
+    analysisPrompt?: string | null;
+  }) {
     if (!mjPrompt) {
       throw new Error('Prompt is required');
     }
@@ -37,7 +45,7 @@ class AI {
       messages: [
         {
           role: 'system',
-          content: process.env.ANALYSIS_PROMPT || defaultAnalysisPrompt,
+          content: analysisPrompt || process.env.ANALYSIS_PROMPT || defaultAnalysisPrompt,
         },
         {
           role: 'user',

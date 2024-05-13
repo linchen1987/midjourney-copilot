@@ -9,7 +9,10 @@ export async function POST(req: Request) {
     return Response.json({ error: 'prompt is required' }, { status: 400 });
   }
 
-  const res = await ai.getPromptSegments(prompt);
+  const res = await ai.getPromptSegments({
+    mjPrompt: prompt,
+  });
+
   try {
     const data = JSON.parse(res.choices[0].message.content || '');
     if (!data) {
