@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import { Toaster } from '@/components/ui/toaster';
+import { Toaster } from 'sonner';
 import CssCompile from '@/components/css-compile';
 import './globals.css';
 
@@ -21,7 +21,17 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         {children}
-        <Toaster />
+        <Toaster
+          position="top-center"
+          toastOptions={{
+            classNames: {
+              error: 'bg-red-500 text-white',
+              success: 'bg-green-500 text-white',
+              warning: 'bg-yellow-500 text-white',
+              info: 'bg-blue-500 text-white',
+            },
+          }}
+        />
         <CssCompile />
       </body>
     </html>

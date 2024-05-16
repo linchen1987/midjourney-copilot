@@ -7,14 +7,15 @@ import {
   HandThumbDownIcon,
   HandThumbUpIcon,
 } from '@heroicons/react/24/outline';
+import { toast } from 'sonner';
 import { Textarea } from '@/components/ui/textarea';
 import PromptWithTags from '@/components/prompt-with-tags';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/spinner';
 import { getPromptSegments } from '@/lib/api';
+import { isNonEnglishCharCountExceeding80Percent } from '@/lib/utils';
 import { Segment } from '@/types';
 import { CATEGORIES } from '@/lib/constants';
-import { useToast } from '@/components/ui/use-toast';
 import Footer from '@/components/footer';
 
 const filterSegments = (segments: Segment[], categoryId: string): Segment[] => {
@@ -28,7 +29,6 @@ const filterSegments = (segments: Segment[], categoryId: string): Segment[] => {
 const exampleMjPrompt = 'A cat, on the couch,pixel art ,canary yellow,closeup';
 
 export default function Home() {
-  const { toast } = useToast();
   const [loading, setLoading] = useState<boolean>(false);
   const [input, setInput] = useState<string>('');
   const [outputPrompt, setOutputPrompt] = useState<string>('');
@@ -56,9 +56,7 @@ export default function Home() {
       const data = await res.json();
       data[0].TargetText && setOutputPromptLocalized(data[0].TargetText);
     } catch (error: Error | any) {
-      toast({
-        title: error?.message,
-      });
+      toast.error(error?.message);
     }
   };
 
@@ -66,10 +64,16 @@ export default function Home() {
     setLoading(true);
     setOutputSegments([]);
     setOutputPrompt('');
-    if (!input) {
-      setInput(exampleMjPrompt);
-    }
+
     const mjPrompt = (input || exampleMjPrompt).trim();
+
+    if (isNonEnglishCharCountExceeding80Percent(mjPrompt)) {
+      toast.error('这好像不是一个提示词哦，试试输入英文提示词吧！');
+      setLoading(false);
+      return;
+    }
+
+    setInput(mjPrompt);
     try {
       fetchTranslate(mjPrompt);
       const { segments: _segments, saySomething: _saySomething } =
@@ -79,9 +83,7 @@ export default function Home() {
       setSaySomething(_saySomething);
       setLoading(false);
     } catch (error: Error | any) {
-      toast({
-        title: error?.message,
-      });
+      toast.error(error?.message);
       setLoading(false);
     }
   };
@@ -121,7 +123,7 @@ export default function Home() {
           disabled={loading || !!(input && !input.trim())}
           onClick={onSubmit}>
           {loading ? <Spinner className="text-inherit size-4 mr-1" /> : null}
-          {input && input === outputPrompt ? '再试一次' : '帮我理解一下'}
+          {input && input === outputPrompt ? '再理解一次' : '帮我理解一下'}
         </Button>
       </div>
 
