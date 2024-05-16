@@ -2,6 +2,11 @@
 
 import { useState } from 'react';
 import clsx from 'clsx';
+import {
+  BookOpenIcon,
+  HandThumbDownIcon,
+  HandThumbUpIcon,
+} from '@heroicons/react/24/outline';
 import { Textarea } from '@/components/ui/textarea';
 import PromptWithTags from '@/components/prompt-with-tags';
 import { Button } from '@/components/ui/button';
@@ -10,6 +15,7 @@ import { getPromptSegments } from '@/lib/api';
 import { Segment } from '@/types';
 import { CATEGORIES } from '@/lib/constants';
 import { useToast } from '@/components/ui/use-toast';
+import Footer from '@/components/footer';
 
 const filterSegments = (segments: Segment[], categoryId: string): Segment[] => {
   const list = [...segments.filter((x) => x.tag === categoryId)];
@@ -19,8 +25,7 @@ const filterSegments = (segments: Segment[], categoryId: string): Segment[] => {
   return list;
 };
 
-const exampleMjPrompt =
-  'luminogram miniature forest , The forest is densely packed with lush trees, eye-level shot, rgb,volumetric, 3D, colorful, hyper detailed, hyper realistic, moonlight, nighttime';
+const exampleMjPrompt = 'A cat, on the couch,pixel art ,canary yellow,closeup';
 
 export default function Home() {
   const { toast } = useToast();
@@ -82,12 +87,28 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen py-8 px-4 lg:px-8 container">
-      <div className="w-full font-extrabold text-4xl text-orange-600">
-        <a href="/">Midjourney 小白理解助手</a>
+    <main className="min-h-screen py-8 px-4 lg:px-8 container flex flex-col">
+      <div className="w-full flex justify-between items-center sm:items-end">
+        <a
+          href="/"
+          className="font-extrabold text-xl sm:text-2xl lg:text-3xl text-orange-600">
+          Midjourney 小白理解助手
+        </a>
+        <div className="flex text-gray-600 items-center">
+          <div className="text-gray-500">
+            今天还能提问 <span className="text-orange-600">100</span> 次
+          </div>
+          <a
+            className="ml-4"
+            title="产品经理的AI服务搭建实操课"
+            href="https://ui1aq1cogim.feishu.cn/docx/WDrsdpuTro9fdwx9v1tcxwhHnpe"
+            target="_blank">
+            <BookOpenIcon className="w-8" />
+          </a>
+        </div>
       </div>
 
-      <div className="mt-10">
+      <div className="mt-16">
         <Textarea
           id="description"
           className="min-h-32 focus:ring-0 focus-visible:ring-0 placeholder:text-gray-400"
@@ -106,7 +127,7 @@ export default function Home() {
 
       {!!outputSegments.length && (
         <div className="mt-10">
-          <div className="text-gray-500 flex items-end">
+          <div className="text-gray-500 flex items-start sm:items-end">
             <img src="/robot-line-icon.svg" alt="bot" width="36" className="mr-2" />
             {saySomething || '结果'}
           </div>
@@ -154,9 +175,15 @@ export default function Home() {
               <div className="mt-4 pt-4 border-t">{outputPromptLocalized}</div>
             )}
           </div>
-          <div className="mt-12 text-gray-400 text-sm text-center">内容由大模型生成</div>
+          <div className="mt-12 text-gray-400 text-sm justify-center flex items-center">
+            内容由大模型生成
+            <HandThumbUpIcon className="ml-4 w-6" />
+            <HandThumbDownIcon className="ml-2 w-6" />
+          </div>
         </div>
       )}
+      <div className="grow"></div>
+      <Footer />
     </main>
   );
 }
