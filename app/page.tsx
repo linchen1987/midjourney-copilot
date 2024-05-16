@@ -2,11 +2,7 @@
 
 import { useState } from 'react';
 import clsx from 'clsx';
-import {
-  BookOpenIcon,
-  HandThumbDownIcon,
-  HandThumbUpIcon,
-} from '@heroicons/react/24/outline';
+import { BookOpen, Bot, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { Textarea } from '@/components/ui/textarea';
 import PromptWithTags from '@/components/prompt-with-tags';
@@ -17,6 +13,7 @@ import { isNonEnglishCharCountExceeding80Percent } from '@/lib/utils';
 import { Segment } from '@/types';
 import { CATEGORIES } from '@/lib/constants';
 import Footer from '@/components/footer';
+import ThemeSelector from '@/components/theme-selector';
 
 const filterSegments = (segments: Segment[], categoryId: string): Segment[] => {
   const list = [...segments.filter((x) => x.tag === categoryId)];
@@ -96,21 +93,25 @@ export default function Home() {
           className="font-extrabold text-xl sm:text-2xl lg:text-3xl text-orange-600">
           Midjourney 小白理解助手
         </a>
-        <div className="flex text-gray-600 items-center">
-          <div className="text-gray-500">
+        <div className="flex text-gray-600 dark:text-gray-400 items-center">
+          <div className="text-gray-500 dark:text-gray-300">
             今天还能提问 <span className="text-orange-600">100</span> 次
           </div>
           <a
-            className="ml-4"
+            className="ml-4 mx-2"
             title="产品经理的AI服务搭建实操课"
             href="https://ui1aq1cogim.feishu.cn/docx/WDrsdpuTro9fdwx9v1tcxwhHnpe"
             target="_blank">
-            <BookOpenIcon className="w-8" />
+            <BookOpen className="w-8" />
           </a>
+          <ThemeSelector />
         </div>
       </div>
 
       <div className="mt-16">
+        <div className="text-lg mb-2 font-bold text-gray-600 dark:text-gray-300">
+          输入一段提示词，帮你理解它
+        </div>
         <Textarea
           id="description"
           className="min-h-32 focus:ring-0 focus-visible:ring-0 placeholder:text-gray-400"
@@ -129,8 +130,8 @@ export default function Home() {
 
       {!!outputSegments.length && (
         <div className="mt-10">
-          <div className="text-gray-500 flex items-start sm:items-end">
-            <img src="/robot-line-icon.svg" alt="bot" width="36" className="mr-2" />
+          <div className="text-gray-500 dark:text-gray-300 flex items-start sm:items-end">
+            <Bot className="mr-2" />
             {saySomething || '结果'}
           </div>
           <div className="mt-8 space-y-2 px-0">
@@ -179,8 +180,8 @@ export default function Home() {
           </div>
           <div className="mt-12 text-gray-400 text-sm justify-center flex items-center">
             内容由大模型生成
-            <HandThumbUpIcon className="ml-4 w-6" />
-            <HandThumbDownIcon className="ml-2 w-6" />
+            <ThumbsUp className="ml-4 w-5 mr-1" />
+            <ThumbsDown className="ml-2 w-5" />
           </div>
         </div>
       )}
