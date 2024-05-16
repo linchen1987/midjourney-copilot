@@ -26,3 +26,10 @@ export function isNonEnglishCharCountExceeding80Percent(input: string): boolean 
   // 判断是否超过 80%
   return nonEnglishCharPercentage > 80;
 }
+
+/**
+ * return yyyy-mm-dd
+ */
+export const getCurrentDate = () => {
+  return new Date().toISOString().split('T')[0];
+};

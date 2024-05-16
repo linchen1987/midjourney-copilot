@@ -1,6 +1,7 @@
 import { AI } from '@/lib/ai';
 import { translate } from '@/lib/translator';
 import type { Segment } from '@/types';
+import { increaseUsedTimes, getRemainingTimes } from '@/lib/db/usages';
 
 const ai = new AI();
 
@@ -9,6 +10,11 @@ export async function POST(req: Request) {
   const { prompt } = body;
   if (!prompt) {
     return Response.json({ error: 'prompt is required' }, { status: 400 });
+  }
+
+  const remainingTimes = await getRemainingTimes();
+  if (remainingTimes < 0) {
+    return Response.json({ error: '今日免费解读次数用完了' }, { status: 403 });
   }
 
   const res = await ai.getPromptSegments({
@@ -53,6 +59,9 @@ export async function POST(req: Request) {
       (translates[0].TargetText || '').split('|').forEach((text: string, i: number) => {
         segments[i].textLocalized = text;
       });
+
+      increaseUsedTimes().catch(console.error);
+
       return Response.json(segments);
     } catch (err: any) {
       console.error(err);

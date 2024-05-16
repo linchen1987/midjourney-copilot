@@ -15,10 +15,14 @@ const _fetch = async (url: string, opts: RequestInit = {}) => {
 };
 
 export async function getPromptSegments(prompt: string) {
-  let data = await _fetch(`/api/get-prompt-segments`, {
+  const data = await _fetch(`/api/get-prompt-segments`, {
     method: 'POST',
     body: JSON.stringify({ prompt }),
   });
+
+  if (data.error) {
+    throw new Error(data.error);
+  }
 
   let saySomething;
   const segments: Segment[] = [];
@@ -29,7 +33,6 @@ export async function getPromptSegments(prompt: string) {
       segments.push(item);
     }
   }
-  console.log(saySomething, segments);
 
   return {
     saySomething,

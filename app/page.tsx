@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import clsx from 'clsx';
 import { BookOpen, Bot, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { toast } from 'sonner';
@@ -14,6 +14,7 @@ import { Segment } from '@/types';
 import { CATEGORIES } from '@/lib/constants';
 import Footer from '@/components/footer';
 import ThemeSelector from '@/components/theme-selector';
+import LeftTimes from '@/components/left-times';
 
 const filterSegments = (segments: Segment[], categoryId: string): Segment[] => {
   const list = [...segments.filter((x) => x.tag === categoryId)];
@@ -23,15 +24,17 @@ const filterSegments = (segments: Segment[], categoryId: string): Segment[] => {
   return list;
 };
 
-const exampleMjPrompt = 'A cat, on the couch,pixel art ,canary yellow,closeup';
+const exampleMjPrompt = 'A cat, on the couch, pixel art ,canary yellow,closeup';
 
 export default function Home() {
   const [loading, setLoading] = useState<boolean>(false);
+  const [loadingRemainingTimes, setLoadingRemainingTimes] = useState<boolean>(false);
   const [input, setInput] = useState<string>('');
   const [outputPrompt, setOutputPrompt] = useState<string>('');
   const [outputPromptLocalized, setOutputPromptLocalized] = useState<string>('');
   const [outputSegments, setOutputSegments] = useState<Segment[]>([]);
   const [saySomething, setSaySomething] = useState<string>();
+  const [remainingTimes, setRemainingTimes] = useState<number>();
 
   const fetchTranslate = async (text: string) => {
     const sourceList = [
@@ -51,6 +54,11 @@ export default function Home() {
         }),
       });
       const data = await res.json();
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
       data[0].TargetText && setOutputPromptLocalized(data[0].TargetText);
     } catch (error: Error | any) {
       toast.error(error?.message);
@@ -58,10 +66,6 @@ export default function Home() {
   };
 
   const onSubmit = async () => {
-    setLoading(true);
-    setOutputSegments([]);
-    setOutputPrompt('');
-
     const mjPrompt = (input || exampleMjPrompt).trim();
 
     if (isNonEnglishCharCountExceeding80Percent(mjPrompt)) {
@@ -70,8 +74,14 @@ export default function Home() {
       return;
     }
 
+    setLoading(true);
+    setOutputSegments([]);
+    setOutputPrompt('');
     setInput(mjPrompt);
     try {
+      // update remaining times first
+      getRemainingTimes({ silent: true });
+
       fetchTranslate(mjPrompt);
       const { segments: _segments, saySomething: _saySomething } =
         await getPromptSegments(mjPrompt);
@@ -79,11 +89,44 @@ export default function Home() {
       setOutputPrompt(mjPrompt);
       setSaySomething(_saySomething);
       setLoading(false);
+
+      // update remaining times again
+      setTimeout(() => {
+        getRemainingTimes({ silent: true });
+      }, 1000);
     } catch (error: Error | any) {
       toast.error(error?.message);
       setLoading(false);
     }
   };
+
+  const getRemainingTimes = async ({ silent }: { silent?: boolean } = {}) => {
+    try {
+      if (!silent) {
+        setLoadingRemainingTimes(true);
+      }
+      const res = await fetch('/api/usages', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      const data = await res.json();
+      if (data.error) {
+        throw new Error(data.error);
+      }
+      setRemainingTimes(data.remainingTimes);
+      setLoadingRemainingTimes(false);
+      console.log(data);
+    } catch (error: Error | any) {
+      console.error(error?.message);
+      setLoadingRemainingTimes(false);
+    }
+  };
+
+  useEffect(() => {
+    getRemainingTimes();
+  }, []);
 
   return (
     <main className="min-h-screen py-8 px-4 lg:px-8 container flex flex-col">
@@ -94,9 +137,6 @@ export default function Home() {
           Midjourney 小白理解助手
         </a>
         <div className="flex text-gray-600 dark:text-gray-400 items-center">
-          <div className="text-gray-500 dark:text-gray-300">
-            今天还能提问 <span className="text-orange-600">100</span> 次
-          </div>
           <a
             className="ml-4 mx-2"
             title="产品经理的AI服务搭建实操课"
@@ -109,12 +149,17 @@ export default function Home() {
       </div>
 
       <div className="mt-16">
-        <div className="text-lg mb-2 font-bold text-gray-600 dark:text-gray-300">
-          输入一段提示词，帮你理解它
+        <div className="text-lg mb-0 sm:mb-1 font-bold text-gray-600 dark:text-gray-300 flex items-center">
+          <Bot className="mr-2" />
+          输入一段提示词，我来帮你理解它
         </div>
+        <LeftTimes
+          className="text-gray-500 dark:text-gray-400 mb-4 pl-8 text-sm"
+          remainingTimes={loadingRemainingTimes ? '...' : remainingTimes}
+        />
         <Textarea
           id="description"
-          className="min-h-32 focus:ring-0 focus-visible:ring-0 placeholder:text-gray-400"
+          className="min-h-32 focus:ring-0 focus-visible:ring-0 placeholder:text-gray-400 text-base"
           placeholder={exampleMjPrompt}
           value={input}
           onChange={(e) => setInput(e.target.value)}
