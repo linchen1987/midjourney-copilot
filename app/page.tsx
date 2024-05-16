@@ -20,7 +20,7 @@ const filterSegments = (segments: Segment[], categoryId: string): Segment[] => {
 };
 
 const exampleMjPrompt =
-  'Create a dynamic and colorful urban street art-inspired composition that blends various elements of graffiti, such as expressive cartoon characters, dripping paint effects, and layered tagging. Incorporate a mixture of vibrant and contrasting colors like electric blue, vivid yellow, and hot pink, while embedding symbols like peace signs, hearts, and iconic pop culture references. Ensure the artwork conveys a sense of spontaneous creativity and the raw energy of the urban underground art scene';
+  'luminogram miniature forest , The forest is densely packed with lush trees, eye-level shot, rgb,volumetric, 3D, colorful, hyper detailed, hyper realistic, moonlight, nighttime';
 
 export default function Home() {
   const { toast } = useToast();
@@ -29,6 +29,7 @@ export default function Home() {
   const [outputPrompt, setOutputPrompt] = useState<string>('');
   const [outputPromptLocalized, setOutputPromptLocalized] = useState<string>('');
   const [outputSegments, setOutputSegments] = useState<Segment[]>([]);
+  const [saySomething, setSaySomething] = useState<string>();
 
   const fetchTranslate = async (text: string) => {
     const sourceList = [
@@ -66,9 +67,11 @@ export default function Home() {
     const mjPrompt = (input || exampleMjPrompt).trim();
     try {
       fetchTranslate(mjPrompt);
-      const _segments = await getPromptSegments(mjPrompt);
+      const { segments: _segments, saySomething: _saySomething } =
+        await getPromptSegments(mjPrompt);
       setOutputSegments(_segments);
       setOutputPrompt(mjPrompt);
+      setSaySomething(_saySomething);
       setLoading(false);
     } catch (error: Error | any) {
       toast({
@@ -81,13 +84,13 @@ export default function Home() {
   return (
     <main className="min-h-screen py-8 px-4 lg:px-8 container">
       <div className="w-full font-extrabold text-4xl text-orange-600">
-        <a href="/">Midjourney Toolkit</a>
+        <a href="/">Midjourney 小白理解助手</a>
       </div>
 
       <div className="mt-10">
         <Textarea
           id="description"
-          className="min-h-32 focus:ring-0 focus-visible:ring-0"
+          className="min-h-32 focus:ring-0 focus-visible:ring-0 placeholder:text-gray-400"
           placeholder={exampleMjPrompt}
           value={input}
           onChange={(e) => setInput(e.target.value)}
@@ -97,36 +100,45 @@ export default function Home() {
           disabled={loading || !!(input && !input.trim())}
           onClick={onSubmit}>
           {loading ? <Spinner className="text-inherit size-4 mr-1" /> : null}
-          提交
+          {input && input === outputPrompt ? '再试一次' : '帮我理解一下'}
         </Button>
       </div>
 
       {!!outputSegments.length && (
         <div className="mt-10">
-          <h2 className="text-3xl mb-4 font-bold text-gray-800">结果</h2>
+          <div className="text-gray-500 flex items-end">
+            <img src="/robot-line-icon.svg" alt="bot" width="36" className="mr-2" />
+            {saySomething || '结果'}
+          </div>
           <div className="mt-8 space-y-2 px-0">
             {CATEGORIES.map((category) => (
               <div key={category.id} className="flex text-lg mr-2">
                 <div className={clsx('font-bold shrink-0', category.textColor)}>
+                  {new Array(4 - category.name.length).fill('').map((x) => (
+                    // 占位
+                    <span key={x} className="opacity-0">
+                      占
+                    </span>
+                  ))}
                   {category.name}：
                 </div>
-                <div className="flex flex-wrap shrink-1">
+                <div className="flex flex-wrap shrink w-full">
                   {filterSegments(outputSegments, category.id).map((x, index) => (
                     <div
                       className={clsx(
-                        'flex items-center shrink-0 text-white mx-2 mb-2 text-[1rem] rounded-lg overflow-hidden'
+                        'flex items-center shrink-0 text-white mx-2 mb-2 text-[1rem] rounded-lg overflow-hidden max-w-full leading-6'
                       )}
                       key={x.text}>
                       <div
                         className={clsx(
-                          'pl-2.5',
+                          'py-0.5 pl-2.5',
                           x.textLocalized ? 'pr-2' : 'pr-2.5',
                           category.bgColor
                         )}>
                         {x.text}
                       </div>
                       {!!x.textLocalized && (
-                        <div className={clsx('pl-2 pr-2.5', 'bg-gray-500')}>
+                        <div className={clsx('pl-2 pr-2.5 py-0.5', 'bg-gray-500')}>
                           {x.textLocalized}
                         </div>
                       )}
@@ -142,6 +154,7 @@ export default function Home() {
               <div className="mt-4 pt-4 border-t">{outputPromptLocalized}</div>
             )}
           </div>
+          <div className="mt-12 text-gray-400 text-sm text-center">内容由大模型生成</div>
         </div>
       )}
     </main>

@@ -16,13 +16,21 @@ export async function POST(req: Request) {
   });
 
   try {
-    const data = JSON.parse(res.choices[0].message.content || '');
+    const data: Record<string, string | string[]> = JSON.parse(
+      res.choices[0].message.content || ''
+    );
     if (!data) {
       return Response.json({ error: 'OpenAI response is empty' }, { status: 500 });
     }
 
     const segments: Segment[] = [];
+    let saySomething: string;
     for (const [category, texts] of Object.entries(data)) {
+      if (category === 'saySomething') {
+        const txt = typeof texts === 'string' ? texts : texts[0];
+        saySomething = txt;
+      }
+
       if (typeof texts === 'string') {
         segments.push({ text: texts, tag: category });
       } else {
@@ -33,10 +41,12 @@ export async function POST(req: Request) {
     }
 
     try {
+      // saySomething 不属于 MJ 提示词，不需要翻译
+      const filteredSegments = segments.filter((x) => x.tag !== 'saySomething');
       const sourceList = [
         {
           id: 'segments',
-          text: segments.map((x: any) => x.text).join('|'),
+          text: filteredSegments.map((x: any) => x.text).join('|'),
         },
       ];
       const translates = await translate(sourceList);

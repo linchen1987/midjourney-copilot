@@ -100,22 +100,9 @@ export default function PromptWithTags({
     <div className="flex items-center flex-wrap">
       {texts.map((segment, index) =>
         segment.tag ? (
-          <TooltipProvider key={index}>
-            <Tooltip>
-              <TooltipTrigger>
-                <span className={clsx('mx-0.5', categories[segment.tag]?.color)}>
-                  {segment.text}
-                </span>
-              </TooltipTrigger>
-              <TooltipContent>
-                <div className="p-2">
-                  <div className="text-sm text-gray-600">
-                    {categories[segment.tag]?.name}
-                  </div>
-                </div>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <span key={index} className={clsx('mx-0.5', categories[segment.tag]?.color)}>
+            {segment.text}
+          </span>
         ) : (
           <span key={index}>{segment.text}</span>
         )

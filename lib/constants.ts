@@ -17,14 +17,14 @@ export const CATEGORIES = [
   },
   {
     id: 'pointOfViewAndComposition',
-    name: '构图',
+    name: '构图视角',
     color: 'yellow-600',
     textColor: 'text-yellow-600',
     bgColor: 'bg-yellow-500',
   },
   {
     id: 'lightingAndColor',
-    name: '光线',
+    name: '光线色彩',
     color: 'red-600',
     textColor: 'text-red-600',
     bgColor: 'bg-red-500',
