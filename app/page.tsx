@@ -121,7 +121,6 @@ export default function Home() {
       const data = await fetchRemainingTimes();
       setRemainingTimes(data.remainingTimes);
       setLoadingRemainingTimes(false);
-      console.log(data);
     } catch (error: Error | any) {
       console.error(error?.message);
       setLoadingRemainingTimes(false);

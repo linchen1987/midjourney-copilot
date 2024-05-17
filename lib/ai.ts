@@ -38,8 +38,6 @@ class AI {
 
     console.log('generating summary');
 
-    console.log(process.env.ANALYSIS_PROMPT);
-
     const completion = await openai.chat.completions.create({
       messages: [
         {
