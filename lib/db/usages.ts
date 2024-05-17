@@ -40,3 +40,19 @@ export async function getRemainingTimes({ date: inputDate }: InputDateParam = {}
   const remainingTimes = Math.max(totalTimes - usedTimes, 0);
   return remainingTimes;
 }
+
+export async function getUsages({ date: inputDate }: InputDateParam = {}) {
+  const date = inputDate || getCurrentDate();
+  const usage = await db.query.usagesTable.findFirst({
+    where: eq(usagesTable.date, date),
+  });
+
+  const usedTimes = usage?.usedTimes || 0;
+  const remainingTimes = Math.max(totalTimes - usedTimes, 0);
+  return {
+    date,
+    totalTimes,
+    usedTimes,
+    remainingTimes,
+  };
+}

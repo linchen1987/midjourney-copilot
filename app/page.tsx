@@ -14,7 +14,7 @@ import {
   fetchPromptSegments,
   postFeedback,
   fetchTranslate,
-  fetchRemainingTimes,
+  fetchUsages,
 } from '@/lib/api';
 import { isNonEnglishCharCountExceeding80Percent } from '@/lib/utils';
 import { Segment } from '@/types';
@@ -35,8 +35,9 @@ const exampleMjPrompt = 'A cat, on the couch, pixel art ,canary yellow,closeup';
 
 export default function Home() {
   const [loading, setLoading] = useState<boolean>(false);
-  const [loadingRemainingTimes, setLoadingRemainingTimes] = useState<boolean>(false);
+  const [loadingUsages, setLoadingUsages] = useState<boolean>(false);
   const [remainingTimes, setRemainingTimes] = useState<number>();
+  const [totalTimes, setTotalTimes] = useState<number>();
   const [input, setInput] = useState<string>('');
   // status
   const [sessionId, setSessionId] = useState<string>();
@@ -93,7 +94,7 @@ export default function Home() {
     setLoading(true);
     try {
       // update remaining times first
-      getRemainingTimes({ silent: true });
+      getUsages({ silent: true });
 
       getTranslate(mjPrompt);
       const res = await fetchPromptSegments(mjPrompt);
@@ -107,7 +108,7 @@ export default function Home() {
 
       // update remaining times again
       setTimeout(() => {
-        getRemainingTimes({ silent: true });
+        getUsages({ silent: true });
       }, 1000);
     } catch (error: Error | any) {
       toast.error(error?.message);
@@ -115,22 +116,23 @@ export default function Home() {
     }
   };
 
-  const getRemainingTimes = async ({ silent }: { silent?: boolean } = {}) => {
+  const getUsages = async ({ silent }: { silent?: boolean } = {}) => {
     try {
       if (!silent) {
-        setLoadingRemainingTimes(true);
+        setLoadingUsages(true);
       }
-      const data = await fetchRemainingTimes();
+      const data = await fetchUsages();
       setRemainingTimes(data.remainingTimes);
-      setLoadingRemainingTimes(false);
+      setTotalTimes(data.totalTimes);
+      setLoadingUsages(false);
     } catch (error: Error | any) {
       console.error(error?.message);
-      setLoadingRemainingTimes(false);
+      setLoadingUsages(false);
     }
   };
 
   useEffect(() => {
-    getRemainingTimes();
+    getUsages();
   }, []);
 
   return (
@@ -174,7 +176,8 @@ export default function Home() {
         </div>
         <LeftTimes
           className="text-gray-500 dark:text-gray-400 mb-4 pl-8 text-sm"
-          remainingTimes={loadingRemainingTimes ? '...' : remainingTimes}
+          remainingTimes={loadingUsages ? '...' : remainingTimes}
+          totalTimes={loadingUsages ? '...' : totalTimes}
         />
         <Textarea
           id="description"

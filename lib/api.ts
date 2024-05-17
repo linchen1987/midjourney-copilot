@@ -87,7 +87,7 @@ export async function fetchTranslate(text: string) {
   return data[0];
 }
 
-export async function fetchRemainingTimes() {
+export async function fetchUsages() {
   return _fetch('/api/usages', {
     method: 'GET',
     headers: {

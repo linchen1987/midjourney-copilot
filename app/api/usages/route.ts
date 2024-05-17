@@ -1,10 +1,11 @@
-import { getRemainingTimes } from '@/lib/db/usages';
+import { getUsages } from '@/lib/db/usages';
 
 export async function GET(req: Request) {
   try {
-    const remainingTimes = await getRemainingTimes();
+    const { remainingTimes, totalTimes } = await getUsages();
     return Response.json({
       remainingTimes,
+      totalTimes,
     });
   } catch (err: any) {
     return Response.json({ error: err?.message }, { status: 500 });
