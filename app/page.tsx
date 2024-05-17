@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import clsx from 'clsx';
 import { BookOpen, Bot, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { toast } from 'sonner';
+import GithubIcon from '@/components/icons/github';
+import DiscordIcon from '@/components/icons/discord';
 import { Textarea } from '@/components/ui/textarea';
 import PromptWithTags from '@/components/prompt-with-tags';
 import { Button } from '@/components/ui/button';
@@ -141,7 +143,21 @@ export default function Home() {
         </a>
         <div className="flex text-gray-600 dark:text-gray-400 items-center">
           <a
-            className="ml-4 mx-2"
+            className=""
+            title="Github"
+            href="https://github.com/linchen1987/midjourney-copilot"
+            target="_blank">
+            <GithubIcon className="w-8" />
+          </a>
+          <a
+            className=""
+            title="Discord"
+            href="https://discord.gg/VhjXsqSY"
+            target="_blank">
+            <DiscordIcon className="w-8" />
+          </a>
+          <a
+            className="ml-1 mr-2"
             title="产品经理的AI服务搭建实操课"
             href="https://ui1aq1cogim.feishu.cn/docx/WDrsdpuTro9fdwx9v1tcxwhHnpe"
             target="_blank">
