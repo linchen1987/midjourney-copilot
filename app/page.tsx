@@ -8,7 +8,12 @@ import { Textarea } from '@/components/ui/textarea';
 import PromptWithTags from '@/components/prompt-with-tags';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/spinner';
-import { getPromptSegments } from '@/lib/api';
+import {
+  fetchPromptSegments,
+  postFeedback,
+  fetchTranslate,
+  fetchRemainingTimes,
+} from '@/lib/api';
 import { isNonEnglishCharCountExceeding80Percent } from '@/lib/utils';
 import { Segment } from '@/types';
 import { CATEGORIES } from '@/lib/constants';
@@ -29,40 +34,46 @@ const exampleMjPrompt = 'A cat, on the couch, pixel art ,canary yellow,closeup';
 export default function Home() {
   const [loading, setLoading] = useState<boolean>(false);
   const [loadingRemainingTimes, setLoadingRemainingTimes] = useState<boolean>(false);
+  const [remainingTimes, setRemainingTimes] = useState<number>();
   const [input, setInput] = useState<string>('');
+  // status
+  const [sessionId, setSessionId] = useState<string>();
   const [outputPrompt, setOutputPrompt] = useState<string>('');
   const [outputPromptLocalized, setOutputPromptLocalized] = useState<string>('');
   const [outputSegments, setOutputSegments] = useState<Segment[]>([]);
   const [saySomething, setSaySomething] = useState<string>();
-  const [remainingTimes, setRemainingTimes] = useState<number>();
+  const [feedback, setFeedback] = useState<'good' | 'bad' | undefined>();
 
-  const fetchTranslate = async (text: string) => {
-    const sourceList = [
-      {
-        id: 'mjPrompt',
-        text,
-      },
-    ];
+  const submitFeedback = async (params: Parameters<typeof postFeedback>[0]) => {
+    toast.success('感谢您的反馈！', {
+      duration: 2000,
+    });
     try {
-      const res = await fetch('/api/translate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          sourceList,
-        }),
-      });
-      const data = await res.json();
+      setFeedback(params.feedback);
+      await postFeedback(params);
+    } catch (error: Error | any) {
+      setFeedback(undefined);
+      toast.error(error?.message);
+      console.error(error?.message);
+    }
+  };
 
-      if (data.error) {
-        throw new Error(data.error);
-      }
-
-      data[0].TargetText && setOutputPromptLocalized(data[0].TargetText);
+  const getTranslate = async (text: string) => {
+    try {
+      const data = await fetchTranslate(text);
+      data?.TargetText && setOutputPromptLocalized(data.TargetText);
     } catch (error: Error | any) {
       toast.error(error?.message);
     }
+  };
+
+  const clearState = () => {
+    setOutputSegments([]);
+    setOutputPrompt('');
+    setOutputPromptLocalized('');
+    setSaySomething('');
+    setSessionId('');
+    setFeedback(undefined);
   };
 
   const onSubmit = async () => {
@@ -74,20 +85,22 @@ export default function Home() {
       return;
     }
 
-    setLoading(true);
-    setOutputSegments([]);
-    setOutputPrompt('');
+    // clear state
+    clearState();
     setInput(mjPrompt);
+    setLoading(true);
     try {
       // update remaining times first
       getRemainingTimes({ silent: true });
 
-      fetchTranslate(mjPrompt);
-      const { segments: _segments, saySomething: _saySomething } =
-        await getPromptSegments(mjPrompt);
-      setOutputSegments(_segments);
+      getTranslate(mjPrompt);
+      const res = await fetchPromptSegments(mjPrompt);
+
+      // fill state
+      setOutputSegments(res.segments || []);
       setOutputPrompt(mjPrompt);
-      setSaySomething(_saySomething);
+      setSaySomething(res.saySomething);
+      setSessionId(res.sessionId);
       setLoading(false);
 
       // update remaining times again
@@ -105,16 +118,7 @@ export default function Home() {
       if (!silent) {
         setLoadingRemainingTimes(true);
       }
-      const res = await fetch('/api/usages', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      const data = await res.json();
-      if (data.error) {
-        throw new Error(data.error);
-      }
+      const data = await fetchRemainingTimes();
       setRemainingTimes(data.remainingTimes);
       setLoadingRemainingTimes(false);
       console.log(data);
@@ -225,8 +229,38 @@ export default function Home() {
           </div>
           <div className="mt-12 text-gray-400 text-sm justify-center flex items-center">
             内容由大模型生成
-            <ThumbsUp className="ml-4 w-5 mr-1" />
-            <ThumbsDown className="ml-2 w-5" />
+            {sessionId && (
+              <>
+                <ThumbsUp
+                  className={clsx(
+                    'ml-4 w-5 mr-1 transition',
+                    !feedback &&
+                      'cursor-pointer hover:text-gray-700 dark:hover:text-gray-200',
+                    feedback === 'good' && 'text-orange-600'
+                  )}
+                  onClick={() =>
+                    !feedback &&
+                    submitFeedback({
+                      feedback: 'good',
+                      sessionId,
+                      result: outputSegments,
+                    })
+                  }
+                />
+                <ThumbsDown
+                  className={clsx(
+                    'ml-2 w-5 transition',
+                    !feedback &&
+                      'cursor-pointer hover:text-gray-700 dark:hover:text-gray-200',
+                    feedback === 'bad' && 'text-orange-600'
+                  )}
+                  onClick={() =>
+                    !feedback &&
+                    submitFeedback({ feedback: 'bad', sessionId, result: outputSegments })
+                  }
+                />
+              </>
+            )}
           </div>
         </div>
       )}

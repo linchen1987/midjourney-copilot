@@ -2,6 +2,7 @@ import { AI } from '@/lib/ai';
 import { translate } from '@/lib/translator';
 import type { Segment } from '@/types';
 import { increaseUsedTimes, getRemainingTimes } from '@/lib/db/usages';
+import { recordUserInputPrompt } from '@/lib/db/prompt-analysis';
 
 const ai = new AI();
 
@@ -17,27 +18,32 @@ export async function POST(req: Request) {
     return Response.json({ error: '今日免费解读次数用完了' }, { status: 403 });
   }
 
-  const res = await ai.getPromptSegments({
-    mjPrompt: prompt,
-  });
-
   try {
-    const data: Record<string, string | string[]> = JSON.parse(
-      res.choices[0].message.content || ''
-    );
+    const [aiRes, session] = await Promise.all([
+      ai.getPromptSegments({
+        mjPrompt: prompt,
+      }),
+      recordUserInputPrompt({ prompt }),
+    ]);
+
+    let data: Record<string, string | string[]> | undefined = undefined;
+    try {
+      data = JSON.parse(aiRes.choices[0].message.content || '');
+    } catch (error) {
+      console.error(`ai response is not valid json: ${aiRes.choices[0].message.content}`);
+    }
+
     if (!data) {
       return Response.json({ error: 'OpenAI response is empty' }, { status: 500 });
     }
 
     const segments: Segment[] = [];
-    let saySomething: string;
+    let saySomething: string = '';
     for (const [category, texts] of Object.entries(data)) {
       if (category === 'saySomething') {
         const txt = typeof texts === 'string' ? texts : texts[0];
         saySomething = txt;
-      }
-
-      if (typeof texts === 'string') {
+      } else if (typeof texts === 'string') {
         segments.push({ text: texts, tag: category });
       } else {
         for (const text of texts as Array<string>) {
@@ -59,14 +65,20 @@ export async function POST(req: Request) {
       (translates[0].TargetText || '').split('|').forEach((text: string, i: number) => {
         segments[i].textLocalized = text;
       });
-
-      increaseUsedTimes().catch(console.error);
-
-      return Response.json(segments);
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      return Response.json(segments);
     }
+
+    // update used times
+    increaseUsedTimes().catch(console.error);
+
+    const res = {
+      sessionId: session.id,
+      segments,
+      saySomething,
+    };
+
+    return Response.json(res);
   } catch (err: any) {
     return Response.json({ error: err?.message }, { status: 500 });
   }

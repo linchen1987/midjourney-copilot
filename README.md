@@ -1,35 +1,53 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Midjourney 小白理解助手
 
-## Getting Started
+帮助用户轻松理解和使用 Midjourney 提示词，提高创作效率和灵感。提供详细解释和实用示例，让新手快速上手，享受创作乐趣。
 
-First, run the development server:
+https://mj.uxone.org/
+
+## Develop
+
+#### Install dependencies
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
+```
+
+#### Prepare Database
+
+1. Create database on vercel
+2. Config database params in .env
+
+```bash
+cp .env.example .env
+```
+
+3. Init database with Drizzle
+
+```bash
+pnpm db:migrate
+```
+
+#### Prepare Tencent Translator API
+1. Register address: https://console.cloud.tencent.com/tmt
+2. Config translator params in .env
+
+#### Prepare OpenAI API
+1. You need to have an openai api key
+2. Config OPENAI_API_KEY params in .env
+3. 如果网络访问有问题，尝试在 .env 中配置你的科学上网代理 https_proxy
+
+#### Develop
+
+Run the development server:
+
+```bash
 pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
+## Deploy
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 

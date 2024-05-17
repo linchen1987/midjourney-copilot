@@ -2,7 +2,7 @@ import { eq, sql } from 'drizzle-orm';
 import { db, usagesTable } from './db';
 import { getCurrentDate } from '@/lib/utils';
 
-const totalTimes = Number(process.env.totalTimes || 100);
+const totalTimes = Number(process.env.TOTAL_TIMES_PER_DAY || 100);
 
 type InputDateParam = { date?: string };
 
