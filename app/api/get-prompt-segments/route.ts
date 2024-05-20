@@ -34,6 +34,7 @@ export async function POST(req: Request) {
     }
 
     if (!data) {
+      console.error('OpenAI response is empty', prompt, aiRes);
       return Response.json({ error: 'OpenAI response is empty' }, { status: 500 });
     }
 
