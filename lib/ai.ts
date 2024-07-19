@@ -49,7 +49,7 @@ class AI {
           content: mjPrompt,
         },
       ],
-      model: model || process.env.OPENAI_MODEL || 'gpt-3.5-turbo-0125',
+      model: model || process.env.OPENAI_MODEL || 'gpt-4o-mini',
     });
     return completion;
   }
