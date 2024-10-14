@@ -24,10 +24,12 @@ class AI {
     mjPrompt,
     model,
     analysisPrompt,
+    responseFormat,
   }: {
     mjPrompt: string;
     model?: string;
     analysisPrompt?: string | null;
+    responseFormat?: 'json';
   }) {
     if (!mjPrompt) {
       throw new Error('Prompt is required');
@@ -50,6 +52,12 @@ class AI {
         },
       ],
       model: model || process.env.OPENAI_MODEL || 'gpt-4o-mini',
+      response_format:
+        responseFormat === 'json'
+          ? {
+              type: 'json_object',
+            }
+          : undefined,
     });
     return completion;
   }

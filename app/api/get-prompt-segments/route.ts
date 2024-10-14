@@ -22,6 +22,7 @@ export async function POST(req: Request) {
     const [aiRes, session] = await Promise.all([
       ai.getPromptSegments({
         mjPrompt: prompt,
+        responseFormat: 'json',
       }),
       recordUserInputPrompt({ prompt }),
     ]);
